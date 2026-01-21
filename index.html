@@ -293,8 +293,8 @@
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center pt-0.5">
-                                                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 opacity-80 uppercase tracking-tighter">
-                                                    <Calendar size={11} strokeWidth={2.5} /> {item.date}
+                                                <span className="text-[10px] font-bold text-slate-400 flex items-center opacity-80 uppercase tracking-tighter">
+                                                    {item.date}
                                                 </span>
                                                 <div className="flex-shrink-0">
                                                     <RatingIcons rating={item.rating} type={item.type} />
@@ -320,7 +320,7 @@
                                     <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
                                         {editingId ? '기록 수정' : (formData.type === 'likes' ? '좋아하는 것 추가' : '싫어하는 것 추가')}
                                     </h2>
-                                    <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-400 rounded-full hover:text-slate-900 transition-colors">
+                                    <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 transition-colors">
                                         <X size={20} />
                                     </button>
                                 </div>
