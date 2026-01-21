@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>취향 기록장</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,12 +15,20 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { 
             font-family: 'Pretendard', sans-serif; 
-            font-size: 18px;
+            font-size: 16px;
             background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         button, input { touch-action: manipulation; }
+        
+        /* 모바일 자판 대응을 위한 모달 위치 조정 */
+        @media (max-height: 500px) {
+            .modal-content {
+                transform: translateY(-5%);
+            }
+        }
     </style>
 </head>
 <body>
@@ -29,7 +37,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const IconBase = ({ children, size = 24, className = "", strokeWidth = 2, fill = "none", ...props }) => (
+        const IconBase = ({ children, size = 20, className = "", strokeWidth = 2, fill = "none", ...props }) => (
             <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width={size} 
@@ -164,7 +172,7 @@
                 const IconComponent = isLike ? Heart : X;
                 
                 return (
-                    <div className="flex gap-1.5 items-center">
+                    <div className="flex gap-1 items-center">
                         {[1, 2, 3, 4, 5].map((val) => {
                             const isActive = val <= rating;
                             let iconClass = "";
@@ -188,7 +196,7 @@
                             return (
                                 <IconComponent
                                     key={val}
-                                    size={interactive ? 30 : 14}
+                                    size={interactive ? 26 : 12}
                                     strokeWidth={!isLike && isActive ? 3.5 : 2}
                                     fill={fill}
                                     className={`${iconClass} ${interactive ? 'cursor-pointer hover:scale-110 active:scale-90' : ''}`}
@@ -212,47 +220,50 @@
             };
 
             const NavButton = ({ active, onClick, icon, label, color }) => (
-                <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-all ${color}`}>
-                    <div className={`transition-transform duration-200 ${active ? 'scale-110' : 'scale-100 opacity-60'}`}>
+                <button onClick={onClick} className={`flex flex-col items-center gap-0.5 transition-all ${color} pt-1.5`}>
+                    <div className={`transition-transform duration-200 ${active ? 'scale-105' : 'scale-100 opacity-60'}`}>
                         {icon}
                     </div>
-                    <span className={`text-[12px] font-bold tracking-tight ${active ? 'opacity-100' : 'opacity-60'}`}>{label}</span>
+                    <span className={`text-[10px] font-bold tracking-tight pb-0.5 ${active ? 'opacity-100' : 'opacity-60'}`}>{label}</span>
                 </button>
             );
 
             return (
                 <div className={`flex flex-col h-screen transition-colors duration-300 ${getPageBg()} text-slate-800 max-w-md mx-auto shadow-2xl overflow-hidden border-x border-slate-200`}>
-                    <header className="bg-white sticky top-0 z-10 px-6 py-5 border-b border-slate-200 shadow-sm">
-                        <div className="flex justify-between items-center">
-                            <h1 className="text-2xl font-bold text-slate-900 tracking-tighter">
+                    <header className="bg-white sticky top-0 z-10 px-6 py-4 border-b border-slate-200 shadow-sm flex items-center h-[64px]">
+                        <div className="flex justify-between items-center w-full">
+                            <h1 className="text-xl font-bold text-slate-900 tracking-tighter flex items-center gap-3">
+                                {activeTab === 'likes' && <div className="w-[3px] h-5 rounded-full bg-rose-500" />}
+                                {activeTab === 'dislikes' && <div className="w-[3px] h-5 rounded-full bg-blue-600" />}
+                                {activeTab === 'ranking' && <div className="w-[3px] h-5 rounded-full bg-slate-900" />}
                                 {activeTab === 'likes' && '좋아하는 것'}
                                 {activeTab === 'dislikes' && '싫어하는 것'}
                                 {activeTab === 'ranking' && '랭킹'}
                             </h1>
                             {activeTab !== 'ranking' && (
-                                <button onClick={() => openModal(activeTab)} className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all shadow-md active:scale-95 ${activeTab === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'}`}>
-                                    <Plus size={28} />
+                                <button onClick={() => openModal(activeTab)} className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all shadow-md active:scale-95 ${activeTab === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'}`}>
+                                    <Plus size={22} />
                                 </button>
                             )}
                         </div>
                     </header>
 
-                    <main className="flex-1 overflow-y-auto px-6 pt-6 pb-36 no-scrollbar">
+                    <main className="flex-1 overflow-y-auto px-5 pt-5 pb-24 no-scrollbar">
                         {activeTab === 'ranking' ? (
-                            <div className="space-y-6">
-                                <div className="flex bg-slate-200/80 p-1.5 rounded-2xl">
-                                    <button onClick={() => setRankingSubTab('likes')} className={`flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-all ${rankingSubTab === 'likes' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}>베스트 랭킹</button>
-                                    <button onClick={() => setRankingSubTab('dislikes')} className={`flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-all ${rankingSubTab === 'dislikes' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>워스트 랭킹</button>
+                            <div className="space-y-4">
+                                <div className="flex bg-slate-200/80 p-1 rounded-xl">
+                                    <button onClick={() => setRankingSubTab('likes')} className={`flex-1 py-2 text-[12px] font-bold rounded-lg transition-all ${rankingSubTab === 'likes' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}>베스트</button>
+                                    <button onClick={() => setRankingSubTab('dislikes')} className={`flex-1 py-2 text-[12px] font-bold rounded-lg transition-all ${rankingSubTab === 'dislikes' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>워스트</button>
                                 </div>
                                 <div className="space-y-2">
                                     {getFilteredRanking(rankingSubTab).length === 0 ? (
-                                        <div className="text-center py-32 text-slate-400 text-base font-medium">기록된 데이터가 없습니다.</div>
+                                        <div className="text-center py-20 text-slate-400 text-sm font-medium">데이터가 없습니다.</div>
                                     ) : (
                                         getFilteredRanking(rankingSubTab).map((item, index) => (
-                                            <div key={item.id} className="bg-white py-2 px-4 rounded-xl border border-white flex items-center gap-3 shadow-sm active:bg-slate-50 transition-colors">
-                                                <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${rankingSubTab === 'likes' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-600'}`}>{index + 1}</div>
+                                            <div key={item.id} className="bg-white py-2 px-3.5 rounded-xl border border-white flex items-center gap-3 shadow-sm active:bg-slate-50 transition-colors">
+                                                <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${rankingSubTab === 'likes' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-600'}`}>{index + 1}</div>
                                                 <div className="flex-1 flex justify-between items-center overflow-hidden">
-                                                    <h3 className="font-bold text-slate-800 text-base tracking-tight mr-4 leading-tight break-all">{item.content}</h3>
+                                                    <h3 className="font-bold text-slate-800 text-sm tracking-tight leading-tight break-all mr-2">{item.content}</h3>
                                                     <div className="flex-shrink-0 scale-90 origin-right">
                                                         <RatingIcons rating={item.rating} type={item.type} />
                                                     </div>
@@ -263,18 +274,18 @@
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {records.filter(r => r.type === activeTab).length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-56 text-slate-300">
-                                        {activeTab === 'likes' ? <Heart size={64} strokeWidth={1.5} /> : <X size={64} strokeWidth={1.5} />}
-                                        <p className="mt-6 text-base font-bold tracking-tight text-slate-400">내용을 추가해 보세요</p>
+                                    <div className="flex flex-col items-center justify-center py-40 text-slate-300">
+                                        {activeTab === 'likes' ? <Heart size={50} strokeWidth={1.5} /> : <X size={50} strokeWidth={1.5} />}
+                                        <p className="mt-4 text-sm font-bold tracking-tight text-slate-400">내용을 추가해 보세요</p>
                                     </div>
                                 ) : (
                                     records.filter(r => r.type === activeTab).map((item) => (
                                         <div key={item.id} className="bg-white px-4 py-2.5 rounded-xl border border-white shadow-sm hover:shadow-md transition-all">
                                             <div className="flex justify-between items-start mb-1.5">
-                                                <div className="flex-1 pr-4">
-                                                    <h3 className="font-bold text-slate-900 text-[17px] leading-tight tracking-tight break-all">{item.content}</h3>
+                                                <div className="flex-1 pr-3">
+                                                    <h3 className="font-bold text-slate-900 text-base leading-tight tracking-tight break-all">{item.content}</h3>
                                                 </div>
                                                 <div className="flex gap-1.5 flex-shrink-0 pt-0.5">
                                                     <button onClick={() => openModal(activeTab, item)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all active:scale-90"><Edit2 size={14} /></button>
@@ -282,8 +293,8 @@
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center pt-0.5">
-                                                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 opacity-80 uppercase tracking-tighter">
-                                                    <Calendar size={12} strokeWidth={2.5} /> {item.date}
+                                                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 opacity-80 uppercase tracking-tighter">
+                                                    <Calendar size={11} strokeWidth={2.5} /> {item.date}
                                                 </span>
                                                 <div className="flex-shrink-0">
                                                     <RatingIcons rating={item.rating} type={item.type} />
@@ -296,39 +307,39 @@
                         )}
                     </main>
 
-                    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center py-4 px-6 z-20 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] rounded-t-[32px]">
-                        <NavButton active={activeTab === 'likes'} onClick={() => setActiveTab('likes')} icon={<Heart size={26} fill={activeTab === 'likes' ? 'currentColor' : 'none'} />} label="좋아요" color={activeTab === 'likes' ? 'text-rose-500' : 'text-slate-400'} />
-                        <NavButton active={activeTab === 'dislikes'} onClick={() => setActiveTab('dislikes')} icon={<X size={26} strokeWidth={activeTab === 'dislikes' ? 3.5 : 2} />} label="싫어요" color={activeTab === 'dislikes' ? 'text-blue-600' : 'text-slate-400'} />
-                        <NavButton active={activeTab === 'ranking'} onClick={() => setActiveTab('ranking')} icon={<Trophy size={26} fill={activeTab === 'ranking' ? 'currentColor' : 'none'} />} label="랭킹" color={activeTab === 'ranking' ? 'text-slate-900' : 'text-slate-400'} />
+                    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-100 flex justify-around items-end py-1.5 pb-2.5 px-6 z-20 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] rounded-t-[24px] h-[64px]">
+                        <NavButton active={activeTab === 'likes'} onClick={() => setActiveTab('likes')} icon={<Heart size={20} fill={activeTab === 'likes' ? 'currentColor' : 'none'} />} label="좋아요" color={activeTab === 'likes' ? 'text-rose-500' : 'text-slate-400'} />
+                        <NavButton active={activeTab === 'dislikes'} onClick={() => setActiveTab('dislikes')} icon={<X size={20} strokeWidth={activeTab === 'dislikes' ? 3.5 : 2} />} label="싫어요" color={activeTab === 'dislikes' ? 'text-blue-600' : 'text-slate-400'} />
+                        <NavButton active={activeTab === 'ranking'} onClick={() => setActiveTab('ranking')} icon={<Trophy size={20} fill={activeTab === 'ranking' ? 'currentColor' : 'none'} />} label="랭킹" color={activeTab === 'ranking' ? 'text-slate-900' : 'text-slate-400'} />
                     </nav>
 
                     {showModal && (
-                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center p-6 z-50 animate-in fade-in duration-200">
-                            <div className="bg-white w-full max-w-sm rounded-[28px] p-7 shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-100">
-                                <div className="flex justify-between items-center mb-7">
-                                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+                            <div className="bg-white w-full max-w-sm rounded-[24px] p-5 shadow-2xl modal-content animate-in zoom-in-95 duration-200 border border-slate-100 overflow-hidden">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
                                         {editingId ? '기록 수정' : (formData.type === 'likes' ? '좋아하는 것 추가' : '싫어하는 것 추가')}
                                     </h2>
-                                    <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 transition-colors">
-                                        <X size={24} />
+                                    <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-400 rounded-full hover:text-slate-900 transition-colors">
+                                        <X size={20} />
                                     </button>
                                 </div>
                                 <form onSubmit={saveRecord}>
-                                    <div className="mb-7">
-                                        <label className="block text-[13px] font-bold text-slate-400 mb-2.5 uppercase tracking-widest px-1">
-                                            {formData.type === 'likes' ? '무엇을 좋아하나요?' : '무엇을 싫어하나요?'}
+                                    <div className="mb-4">
+                                        <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest px-1">
+                                            {formData.type === 'likes' ? '좋아하는 것은?' : '싫어하는 것은?'}
                                         </label>
                                         <input 
                                             autoFocus 
                                             type="text" 
                                             placeholder="내용을 입력해주세요" 
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-[18px] px-5 py-4 text-base text-slate-900 font-bold outline-none focus:ring-2 focus:ring-slate-900/10 focus:bg-white transition-all placeholder:text-slate-300" 
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-[14px] px-4 py-2 text-sm text-slate-900 font-bold outline-none focus:ring-2 focus:ring-slate-900/10 focus:bg-white transition-all placeholder:text-slate-300" 
                                             value={formData.content} 
                                             onChange={(e) => setFormData({ ...formData, content: e.target.value })} 
                                         />
                                     </div>
-                                    <div className="mb-10 flex justify-center">
-                                        <div className="inline-block px-6 py-5 bg-slate-50 rounded-[24px] border border-slate-100 shadow-inner">
+                                    <div className="mb-5 flex justify-center">
+                                        <div className="inline-block px-4 py-2.5 bg-slate-50 rounded-[16px] border border-slate-100">
                                             <RatingIcons 
                                                 rating={formData.rating} 
                                                 type={formData.type} 
@@ -340,7 +351,7 @@
                                     <button 
                                         type="submit" 
                                         disabled={!formData.content.trim() || formData.rating === 0} 
-                                        className={`w-full py-5 rounded-[22px] font-bold text-lg text-white shadow-xl transition-all active:scale-95 disabled:opacity-30 disabled:shadow-none ${formData.type === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-100' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'}`}
+                                        className={`w-full py-3 rounded-[16px] font-bold text-base text-white shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:shadow-none ${formData.type === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-100' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'}`}
                                     >
                                         저장하기
                                     </button>
