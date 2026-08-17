@@ -182,7 +182,8 @@
             const RatingIcons = ({ rating, type, interactive = false, onRate = null }) => {
                 const isLike = type === 'likes';
                 const isMemo = type === 'memo';
-                const IconComponent = isMemo ? Star : (isLike ? Heart : X);
+                const isGratitude = type === 'gratitude';
+                const IconComponent = isMemo ? Star : (isGratitude ? Star : (isLike ? Heart : X));
                 
                 return (
                     <div className="flex gap-1 items-center">
@@ -197,6 +198,13 @@
                                     fill = "currentColor";
                                 } else {
                                     iconClass = "text-amber-200 transition-all duration-200";
+                                }
+                            } else if (isGratitude) {
+                                if (isActive) {
+                                    iconClass = "text-emerald-400 transition-all duration-200";
+                                    fill = "currentColor";
+                                } else {
+                                    iconClass = "text-emerald-200 transition-all duration-200";
                                 }
                             } else if (isLike) {
                                 if (isActive) {
@@ -217,7 +225,7 @@
                                 <IconComponent
                                     key={val}
                                     size={interactive ? 26 : 12}
-                                    strokeWidth={!isLike && !isMemo && isActive ? 3.5 : 2}
+                                    strokeWidth={!isLike && !isMemo && !isGratitude && isActive ? 3.5 : 2}
                                     fill={fill}
                                     className={`${iconClass} ${interactive ? 'cursor-pointer hover:scale-110 active:scale-90' : ''}`}
                                     onClick={(e) => {
@@ -237,6 +245,7 @@
                 if (activeTab === 'likes') return 'bg-rose-100/60';
                 if (activeTab === 'dislikes') return 'bg-blue-100/60';
                 if (activeTab === 'memo') return 'bg-amber-100/60';
+                if (activeTab === 'gratitude') return 'bg-emerald-100/60';
                 return 'bg-slate-100/50';
             };
 
@@ -255,16 +264,18 @@
                         <div className="flex justify-between items-center w-full">
                             <h1 className="text-xl font-bold text-slate-900 tracking-tighter flex items-center gap-3">
                                 {activeTab === 'memo' && <div className="w-[3px] h-5 rounded-full bg-amber-400" />}
+                                {activeTab === 'gratitude' && <div className="w-[3px] h-5 rounded-full bg-emerald-400" />}
                                 {activeTab === 'likes' && <div className="w-[3px] h-5 rounded-full bg-rose-500" />}
                                 {activeTab === 'dislikes' && <div className="w-[3px] h-5 rounded-full bg-blue-600" />}
                                 {activeTab === 'ranking' && <div className="w-[3px] h-5 rounded-full bg-slate-900" />}
                                 {activeTab === 'memo' && '기억'}
+                                {activeTab === 'gratitude' && '감사'}
                                 {activeTab === 'likes' && '좋아하는 것'}
                                 {activeTab === 'dislikes' && '싫어하는 것'}
                                 {activeTab === 'ranking' && '랭킹'}
                             </h1>
                             {activeTab !== 'ranking' && (
-                                <button onClick={() => openModal(activeTab)} className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all shadow-md active:scale-95 ${activeTab === 'memo' ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-200' : activeTab === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'}`}>
+                                <button onClick={() => openModal(activeTab)} className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all shadow-md active:scale-95 ${activeTab === 'memo' ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-200' : activeTab === 'gratitude' ? 'bg-emerald-400 hover:bg-emerald-500 shadow-emerald-200' : activeTab === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'}`}>
                                     <Plus size={22} />
                                 </button>
                             )}
@@ -300,7 +311,7 @@
                             <div className="space-y-3">
                                 {records.filter(r => r.type === activeTab).length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-40 text-slate-300">
-                                        {activeTab === 'memo' ? <NotebookText size={50} strokeWidth={1.5} /> : (activeTab === 'likes' ? <Heart size={50} strokeWidth={1.5} /> : <X size={50} strokeWidth={1.5} />)}
+                                        {activeTab === 'memo' ? <NotebookText size={50} strokeWidth={1.5} /> : (activeTab === 'gratitude' ? <Star size={50} strokeWidth={1.5} /> : (activeTab === 'likes' ? <Heart size={50} strokeWidth={1.5} /> : <X size={50} strokeWidth={1.5} />))}
                                         <p className="mt-4 text-sm font-bold tracking-tight text-slate-400">내용을 추가해 보세요</p>
                                     </div>
                                 ) : (
@@ -308,7 +319,7 @@
                                         <div key={item.id} className="bg-white px-4 py-2.5 rounded-xl border border-white shadow-sm hover:shadow-md transition-all">
                                             <div className="flex justify-between items-start mb-1.5">
                                                 <div className="flex-1 pr-3">
-                                                    <h3 className={`font-bold text-slate-900 text-base leading-tight tracking-tight ${item.type === 'memo' ? 'whitespace-pre-wrap break-words' : 'break-all'}`}>{item.content}</h3>
+                                                    <h3 className={`font-bold text-slate-900 text-base leading-tight tracking-tight ${(item.type === 'memo' || item.type === 'gratitude') ? 'whitespace-pre-wrap break-words' : 'break-all'}`}>{item.content}</h3>
                                                 </div>
                                                 <div className="flex gap-1.5 flex-shrink-0 pt-0.5">
                                                     <button onClick={() => openModal(activeTab, item)} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all active:scale-90"><Edit2 size={14} /></button>
@@ -332,6 +343,7 @@
 
                     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-100 flex justify-around items-end py-1.5 pb-2.5 px-6 z-20 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] rounded-t-[24px] h-[64px]">
                         <NavButton active={activeTab === 'memo'} onClick={() => setActiveTab('memo')} icon={<NotebookText size={20} strokeWidth={activeTab === 'memo' ? 2.5 : 2} />} label="기억" color={activeTab === 'memo' ? 'text-amber-500' : 'text-slate-400'} />
+                        <NavButton active={activeTab === 'gratitude'} onClick={() => setActiveTab('gratitude')} icon={<Star size={20} fill={activeTab === 'gratitude' ? 'currentColor' : 'none'} strokeWidth={activeTab === 'gratitude' ? 2.5 : 2} />} label="감사" color={activeTab === 'gratitude' ? 'text-emerald-500' : 'text-slate-400'} />
                         <NavButton active={activeTab === 'likes'} onClick={() => setActiveTab('likes')} icon={<Heart size={20} fill={activeTab === 'likes' ? 'currentColor' : 'none'} />} label="좋아요" color={activeTab === 'likes' ? 'text-rose-500' : 'text-slate-400'} />
                         <NavButton active={activeTab === 'dislikes'} onClick={() => setActiveTab('dislikes')} icon={<X size={20} strokeWidth={activeTab === 'dislikes' ? 3.5 : 2} />} label="싫어요" color={activeTab === 'dislikes' ? 'text-blue-600' : 'text-slate-400'} />
                         <NavButton active={activeTab === 'ranking'} onClick={() => setActiveTab('ranking')} icon={<Trophy size={20} fill={activeTab === 'ranking' ? 'currentColor' : 'none'} />} label="랭킹" color={activeTab === 'ranking' ? 'text-slate-900' : 'text-slate-400'} />
@@ -342,7 +354,7 @@
                             <div className="bg-white w-full max-w-sm rounded-[24px] p-5 shadow-2xl modal-content animate-in zoom-in-95 duration-200 border border-slate-100 overflow-hidden">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
-                                        {editingId ? '기록 수정' : (formData.type === 'memo' ? '기억 추가' : (formData.type === 'likes' ? '좋아하는 것 추가' : '싫어하는 것 추가'))}
+                                        {editingId ? '기록 수정' : (formData.type === 'memo' ? '기억 추가' : (formData.type === 'gratitude' ? '감사 추가' : (formData.type === 'likes' ? '좋아하는 것 추가' : '싫어하는 것 추가')))}
                                     </h2>
                                     <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-900 transition-colors">
                                         <X size={20} />
@@ -351,7 +363,7 @@
                                 <form onSubmit={saveRecord}>
                                     <div className="mb-4">
                                         <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest px-1">
-                                            {formData.type === 'memo' ? '무엇을 기억할까요?' : (formData.type === 'likes' ? '좋아하는 것은?' : '싫어하는 것은?')}
+                                            {formData.type === 'memo' ? '무엇을 기억할까요?' : (formData.type === 'gratitude' ? '무엇에 감사한가요?' : (formData.type === 'likes' ? '좋아하는 것은?' : '싫어하는 것은?'))}
                                         </label>
                                         {formData.type === 'memo' ? (
                                             <textarea 
@@ -359,6 +371,15 @@
                                                 rows={9}
                                                 placeholder="오늘의 기억을 적어보세요" 
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-[14px] px-4 py-3 text-sm text-slate-900 font-bold outline-none focus:ring-2 focus:ring-amber-400/20 focus:bg-white transition-all placeholder:text-slate-300 resize-none" 
+                                                value={formData.content} 
+                                                onChange={(e) => setFormData({ ...formData, content: e.target.value })} 
+                                            />
+                                        ) : formData.type === 'gratitude' ? (
+                                            <textarea 
+                                                autoFocus 
+                                                rows={9}
+                                                placeholder="오늘 감사한 일을 적어보세요" 
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-[14px] px-4 py-3 text-sm text-slate-900 font-bold outline-none focus:ring-2 focus:ring-emerald-400/20 focus:bg-white transition-all placeholder:text-slate-300 resize-none" 
                                                 value={formData.content} 
                                                 onChange={(e) => setFormData({ ...formData, content: e.target.value })} 
                                             />
@@ -386,7 +407,7 @@
                                     <button 
                                         type="submit" 
                                         disabled={!formData.content.trim() || formData.rating === 0} 
-                                        className={`w-full py-3 rounded-[16px] font-bold text-base text-white shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:shadow-none ${formData.type === 'memo' ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-100' : formData.type === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-100' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'}`}
+                                        className={`w-full py-3 rounded-[16px] font-bold text-base text-white shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:shadow-none ${formData.type === 'memo' ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-100' : formData.type === 'gratitude' ? 'bg-emerald-400 hover:bg-emerald-500 shadow-emerald-100' : formData.type === 'likes' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-100' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-100'}`}
                                     >
                                         저장하기
                                     </button>
